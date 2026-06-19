@@ -1,4 +1,4 @@
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { sendMessage } from '@/lib/telegram'
 import { loadTurns, appendTurn } from '@/lib/bot-memory'
 import { getRecords } from '@/lib/records'
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   const records = await getRecords()
   const recent = await loadTurns(chatId)
 
-  // 3) Ask Claude over the data. Everything in the DATA block is UNTRUSTED.
+  // 3) Ask DeepSeek over the data. Everything in the DATA block is UNTRUSTED.
   const system =
     `You are Jarvis, a concise ops assistant. Answer ONLY from the records JSON below. ` +
     `Each record has a "category" (lead, invoice, task, post, project, contact, content) and a "meta" bag of extra fields — use them. ` +
@@ -55,18 +55,17 @@ export async function POST(req: Request) {
     (recent ? `Recent conversation:\n${recent}\n` : '') +
     `<<<DATA\n${JSON.stringify(records)}\nDATA>>>`
 
-  let answer = 'Sorry, I hit an error. Check your ANTHROPIC_API_KEY has credit.'
+  let answer = 'Sorry, I hit an error. Check your DEEPSEEK_API_KEY has credit.'
   try {
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY?.trim() })
-    const res = await anthropic.messages.create({
-      model: 'claude-haiku-4-5',
+    const deepseek = new OpenAI({ apiKey: process.env.DEEPSEEK_API_KEY?.trim(), baseURL: 'https://api.deepseek.com' })
+    const res = await deepseek.chat.completions.create({
+      model: 'deepseek-chat',
       max_tokens: 1024,
-      system,
-      messages: [{ role: 'user', content: msg.text }],
+      messages: [{ role: 'system', content: system }, { role: 'user', content: msg.text }],
     })
-    answer = res.content.find(c => c.type === 'text')?.text ?? answer
+    answer = res.choices[0]?.message?.content ?? answer
   } catch (e) {
-    console.error('[GLCC] Claude error:', e)
+    console.error('[GLCC] DeepSeek error:', e)
   }
 
   await appendTurn(chatId, msg.text, answer)

@@ -28,11 +28,11 @@ export default function Office() {
       const res = await fetch('/api/jarvis-oyen?preview=1', { headers: { 'x-glcc-preview': '1' } })
       const data = await res.json().catch(() => ({}))
       if (data.ok && data.briefing) setBrief(data.briefing.replace(/<\/?b>/g, '').replace(/<\/?i>/g, ''))
-      else if (data.reason === 'no_api_key') setBrief('⚙️ Add your ANTHROPIC_API_KEY (the N step) — then Jarvis Oyen can brief you here. This is expected before setup, not a bug.')
-      else if (data.reason === 'api_error') setBrief('⚙️ Your ANTHROPIC_API_KEY errored — check it has credit, then try again.')
-      else setBrief('Could not reach the agent yet. It lights up once you\'ve added your ANTHROPIC_API_KEY and deployed.')
+      else if (data.reason === 'no_api_key') setBrief('⚙️ Add your DEEPSEEK_API_KEY (the N step) — then Jarvis Oyen can brief you here. This is expected before setup, not a bug.')
+      else if (data.reason === 'api_error') setBrief('⚙️ Your DEEPSEEK_API_KEY errored — check it has credit, then try again.')
+      else setBrief('Could not reach the agent yet. It lights up once you\'ve added your DEEPSEEK_API_KEY and deployed.')
     } catch {
-      setBrief('Could not reach the agent yet. It lights up once you\'ve added your ANTHROPIC_API_KEY and deployed.')
+      setBrief('Could not reach the agent yet. It lights up once you\'ve added your DEEPSEEK_API_KEY and deployed.')
     } finally {
       setLoading(false)
     }
